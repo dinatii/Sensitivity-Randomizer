@@ -1,0 +1,25 @@
+Sensitivity Randomizer 1.2.0 RC2
+================================
+
+1. Нужны Windows 10/11 x64 и .NET Framework 4.7.2 или новее.
+2. Установи Raw Accel v1.7.1 и перезагрузи Windows.
+3. Установи Microsoft Visual C++ Redistributable 2015-2022 x64.
+4. Полностью извлеки весь ZIP. Не запускай EXE внутри архива.
+5. В Raw Accel выставь Accel Type = Off/noaccel во всех профилях и нажми Apply.
+6. Запусти SensitivityRandomizer.exe рядом со всеми DLL и ResetGuard.
+7. Нажми «Проверить». До Start должны быть multiplier 1.000 и constant gain.
+
+Программа меняет только постоянный multiplier Raw Accel. Mouse DPI и Base
+sensitivity в интерфейсе нужны для расчёта и программой не изменяются.
+
+Темы: Dark, Light, Pastel.
+Языки: Русский, English, Deutsch, Español, Polski, Українська.
+
+Stop, Reset, таймер и штатное закрытие возвращают multiplier к 1.000.
+После закрытия нет tray-процесса и автозапуска.
+
+Если окно не открылось, смотри:
+%LocalAppData%\SensitivityRandomizer\startup.log
+
+Подробности находятся в README.md и TROUBLESHOOTING.md.
+Автор: https://dinati.ru/

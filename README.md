@@ -1,322 +1,291 @@
 <p align="center">
-  <img src="assets/logo.png" width="128" alt="Sensitivity Randomizer logo">
+  <img src="assets/SensitivityRandomizer-logo.png" width="128" alt="Sensitivity Randomizer logo">
 </p>
 
 <h1 align="center">Sensitivity Randomizer</h1>
 
 <p align="center">
-  A game-independent mouse sensitivity randomizer for Windows, built for aim training and sensitivity variability.
+  A game-independent mouse sensitivity randomizer for Windows, built for variable-practice aim training.
 </p>
 
 <p align="center">
-  <img alt="Windows 10/11" src="https://img.shields.io/badge/Windows-10%20%7C%2011-blue">
-  <img alt="Platform" src="https://img.shields.io/badge/platform-x64-lightgrey">
-  <img alt="Raw Accel" src="https://img.shields.io/badge/driver-Raw%20Accel-orange">
+  <img alt="Version 1.2.0 RC2" src="https://img.shields.io/badge/version-1.2.0--rc2-7c72e8">
+  <img alt="Windows 10/11" src="https://img.shields.io/badge/Windows-10%20%7C%2011-2188ff">
+  <img alt="Platform x64" src="https://img.shields.io/badge/platform-x64-lightgrey">
+  <img alt="License MIT" src="https://img.shields.io/badge/license-MIT-2ea44f">
 </p>
 
 <p align="center">
   <a href="../../releases/latest"><strong>Download latest release</strong></a>
-  ·
-  <a href="#installation">Installation</a>
-  ·
-  <a href="#how-it-works">How it works</a>
-  ·
-  <a href="#configuration">Configuration</a>
+  · <a href="#installation">Installation</a>
+  · <a href="#first-setup">First setup</a>
+  · <a href="#safety-and-anti-cheat">Safety</a>
+</p>
+
+<p align="center">
+  <a href="README.ru.md">Русская документация</a>
+  · <a href="README.en.md">Detailed English documentation</a>
 </p>
 
 ---
 
-## What is Sensitivity Randomizer?
+## What is it?
 
-Sensitivity Randomizer continuously varies your effective mouse sensitivity within a configurable range.
+Sensitivity Randomizer periodically changes a constant mouse-input multiplier
+inside a configurable range. It works through the installed
+[Raw Accel](https://github.com/RawAccelOfficial/rawaccel) driver, so the same
+training profile can be used across games, aim trainers and ordinary desktop
+input.
 
-Unlike in-game sensitivity randomizers, it works at the raw mouse-input level through the **Raw Accel** driver. This makes it game-independent: the same randomization can be used in CS2, VALORANT, aim trainers, desktop applications, or practically any other program that uses mouse input.
+It is a variable-practice tool, not an in-game sensitivity editor. The app does
+not change your mouse's physical DPI and does not write sensitivity settings to
+any game. Its DPI and base-sensitivity fields are display inputs used only to
+calculate effective sensitivity and eDPI.
 
-The program is intended primarily as a **training tool** for players who want to practice mouse control across a range of sensitivities instead of adapting exclusively to one fixed value.
-
-> Sensitivity Randomizer does **not** use speed-based mouse acceleration.  
-> Your multiplier changes over time according to the randomization settings, not according to how quickly you move the mouse.
+> **No speed-based acceleration.** Every selected multiplier stays constant
+> regardless of how quickly the mouse moves. The app refuses to start a session
+> if a speed-based Raw Accel profile is detected.
 
 ## Features
 
-- Game-independent sensitivity randomization
-- Configurable minimum and maximum multipliers
-- Wide multiplier range for unusual or experimental setups
-- Baseline multiplier of `1.0`
-- Balanced randomization around the baseline
-- Optional symmetry between values below and above `1.0`
-- Configurable randomization interval
-- Raw Accel driver integration
-- Import/export of settings
-- Multiple interface languages
-- Dark, light and pastel themes
-- Portable application: no separate application installer required
-- Automatic restoration/handling of sensitivity when randomization is stopped
-
-## Screenshot
-
-<p align="center">
-  <img src="assets/screenshot.png" width="850" alt="Sensitivity Randomizer interface">
-</p>
+- **Balanced Coverage:** eight logarithmic zones per cycle, visited once each,
+  with exactly four values below and four above `1.000`;
+- editable multiplier range from `0.10000` to `10.00000`;
+- optional reciprocal bounds satisfying `min × max = 1`;
+- Smooth Random Walk, Centered Gaussian and Linear Uniform alternatives;
+- fixed or randomized change intervals, session timer and recalibration phase;
+- deterministic seed option for repeatable sessions;
+- verified JSON configuration import and export;
+- Russian, English, German, Spanish, Polish and Ukrainian interfaces;
+- Dark, Light and Pastel themes;
+- live logarithmic chart, local CSV/JSON logs and session statistics;
+- readback verification after writes and an independent ResetGuard fallback;
+- portable app with no background service, tray process or autostart entry.
 
 ## How it works
 
-The program treats your normal sensitivity as the **baseline**:
+Your ordinary sensitivity is the `1.000` baseline:
 
 ```text
-1.00x = your normal sensitivity
-0.80x = 20% lower than normal
-1.25x = 25% higher than normal
-2.00x = twice your normal sensitivity
+0.500x = half of the baseline
+1.000x = the baseline
+1.750x = 75% above the baseline
+2.000x = twice the baseline
 ```
 
-During randomization, Sensitivity Randomizer periodically selects a new multiplier from the configured range and sends the required sensitivity value to the Raw Accel driver.
+At each scheduled change, the app writes a new constant `outputDPI` multiplier
+to Raw Accel and verifies the result. The multiplier remains unchanged until the
+next scheduled write.
 
-The important distinction is that this is **not mouse acceleration**. A selected multiplier remains constant regardless of mouse speed until the program changes it again.
+### Balanced Coverage
 
-When balanced/symmetric randomization is enabled, the randomization logic is designed around the `1.0x` baseline so that training is not intentionally biased toward permanently higher or lower sensitivity.
+Balanced Coverage divides the configured interval into eight equal zones in
+logarithmic space. A cycle samples each zone exactly once in shuffled order.
+This gives regular exposure to low, middle and high parts of the entire range,
+while guaranteeing an equal count below and above `1.000` in every complete
+cycle.
 
-### Example
-
-With:
+This balance is multiplicative, not an arithmetic-mean guarantee. If you want
+the endpoints to be equally far from the baseline in multiplicative terms,
+enable reciprocal linking. For example:
 
 ```text
-Minimum: 0.50x
-Maximum: 2.00x
+0.50000 ↔ 2.00000
+0.57000 ↔ 1.75439
+0.33333 ↔ 3.00000
 ```
-
-your effective sensitivity may change like this:
-
-```text
-1.00x → 0.73x → 1.41x → 0.58x → 1.86x → ...
-```
-
-Your in-game sensitivity does not need to be changed.
 
 ## Requirements
 
-- Windows 10 or Windows 11, 64-bit
-- A mouse
-- **Raw Accel driver**
+- Windows 10 or Windows 11, 64-bit;
+- [Raw Accel v1.7.1](https://github.com/RawAccelOfficial/rawaccel/releases/tag/v1.7.1)
+  installed, followed by a Windows restart;
+- [Microsoft Visual C++ Redistributable 2015–2022 x64](https://aka.ms/vs/17/release/vc_redist.x64.exe);
+- .NET Framework 4.7.2 or newer.
 
-Raw Accel is an open-source signed Windows mouse-input driver. Sensitivity Randomizer uses the installed driver to apply sensitivity multipliers.
-
-Official Raw Accel repository:
-
-**https://github.com/RawAccelOfficial/rawaccel**
-
-> Only download Raw Accel from its official GitHub repository. The Raw Accel developers explicitly state that their official GitHub is the authoritative download location.
+Raw Accel should be downloaded only from its
+[official repository](https://github.com/RawAccelOfficial/rawaccel). Version
+1.7.1 is the version tested with this release.
 
 ## Installation
 
-### 1. Download and install Raw Accel
+### 1. Install Raw Accel
 
-1. Open the official Raw Accel releases page:  
-   **https://github.com/RawAccelOfficial/rawaccel/releases/latest**
-2. Under **Assets**, download the current `RawAccel_...zip` release.
-3. Extract the archive.
-4. Run `installer.exe` as instructed by Raw Accel.
-5. Restart Windows.
+1. Download `RawAccel_v1.7.1.zip` from the
+   [official release](https://github.com/RawAccelOfficial/rawaccel/releases/tag/v1.7.1).
+2. Extract it, run `installer.exe`, and restart Windows.
+3. Open the Raw Accel GUI once. For every active profile, set acceleration to
+   **Off / noaccel**, apply the profile, and confirm the ordinary multiplier is
+   `1.000`.
 
-After the driver has been installed successfully and the PC has been restarted, the extracted Raw Accel download folder is **not required for normal Sensitivity Randomizer use**.
+After installation and the required restart, Sensitivity Randomizer needs only
+the installed driver and its own bundled `wrapper.dll`. The downloaded Raw Accel
+ZIP and extracted folder may be deleted. That folder also contains Raw Accel's
+GUI and `uninstaller.exe`, so download the official package again if you later
+need either one.
 
-You may delete the downloaded ZIP and extracted Raw Accel files if you do not plan to use the Raw Accel GUI.
+### 2. Install Sensitivity Randomizer
 
-Keep in mind:
+1. Download `Sensitivity-Randomizer-v1.2.0-rc2-win-x64.zip` from GitHub
+   **Releases**.
+2. If Windows shows an **Unblock** checkbox in the ZIP properties, enable it.
+3. Extract the entire archive to an ordinary local folder. Do not run the EXE
+   from inside the ZIP.
+4. Keep these files together:
 
-- `rawaccel.exe` is Raw Accel's own GUI.
-- `uninstaller.exe` is used to uninstall the Raw Accel driver.
-- If you delete the folder and later need the uninstaller, you can download the official Raw Accel release again.
+   ```text
+   SensitivityRandomizer.exe
+   SensitivityResetGuard.exe
+   wrapper.dll
+   Newtonsoft.Json.dll
+   ```
 
-Raw Accel's driver does not permanently store sensitivity settings across Windows restarts. Sensitivity Randomizer applies the values it needs while it is running.
+5. Run `SensitivityRandomizer.exe`.
 
-### 2. Download Sensitivity Randomizer
-
-1. Open this repository's **Releases** section.
-2. Download the latest Sensitivity Randomizer release.
-3. Extract it if the release is distributed as a ZIP.
-4. Run `SensitivityRandomizer.exe`.
-
-No separate installer is required unless stated otherwise in a specific release.
+The main executable is intentionally small because the interface and program
+logic use the Windows .NET Framework; required native and JSON components are
+shipped beside it.
 
 ## First setup
 
-For a normal setup:
+1. Click **Verify** before starting a session.
+2. Continue only if the app confirms constant gain, acceleration **Off**, and a
+   current multiplier of `1.000`.
+3. Choose **Balanced Coverage** for even coverage of the configured range.
+4. Set minimum and maximum multipliers. Enable reciprocal linking if desired.
+5. Choose a fixed or randomized interval and optional session timer.
+6. Start the randomizer, then begin the game or training session.
 
-1. Install the Raw Accel driver and restart Windows.
-2. Launch Sensitivity Randomizer.
-3. Leave your normal in-game sensitivity unchanged.
-4. Set your desired randomization range.
-5. Set the randomization interval.
-6. Enable symmetry/balancing if desired.
-7. Start randomization.
-
-A good conservative starting range is:
-
-```text
-0.75x – 1.33x
-```
-
-A wider training range could be:
-
-```text
-0.50x – 2.00x
-```
-
-Very wide ranges are intentionally supported, but extreme values can make normal desktop use difficult. Increase the range gradually if you are not sure what is comfortable.
+A moderate reciprocal range is `0.75–1.33333`. A wider example is `0.50–2.00`.
+Extreme values up to `0.10–10.00` are supported, but can make desktop control
+difficult. `F9` always requests an emergency reset to `1.000`.
 
 ## Configuration
 
-### Minimum / Maximum multiplier
+Only the multiplier range and a change schedule are required. Mode-specific
+options appear only when relevant.
 
-Defines the range from which sensitivity multipliers can be selected.
+| Control | Purpose |
+|---|---|
+| Minimum / maximum | Limits for the constant multiplier |
+| Reciprocal link | Maintains `min × max = 1` when either endpoint changes |
+| Randomization mode | Selects coverage behavior between changes |
+| Change interval | Fixed duration or randomized minimum/maximum duration |
+| Session timer | Stops and restores the baseline when time expires |
+| Recalibration | Optionally returns to `1.000` between random values |
+| Seed | Repeats a deterministic sequence for comparison |
+| Mouse DPI / base sensitivity | Display-only effective-sensitivity calculation |
 
-`1.0x` always represents your normal baseline.
+Use **Export** to save a validated portable JSON profile and **Import** to load
+one. Import never silently accepts unsupported versions or invalid ranges.
 
-### Randomization interval
+## Checking operation and shutdown
 
-Controls how frequently a new multiplier is selected.
+- The status strip and live graph show the multiplier last read back from Raw
+  Accel, not merely the value requested by the UI.
+- **Verify** checks the installed driver, profile type, constant-gain state and
+  current multiplier.
+- **Stop**, timer completion and **F9 Reset** write `1.000` and verify it.
+- Closing the main window normally restores and verifies `1.000`, then fully
+  exits. The app has no tray mode and does not start with Windows.
+- If the main process crashes during an active session, ResetGuard independently
+  retries restoration to `1.000` and exits after completing its task.
 
-Short intervals create more frequent adaptation demands. Longer intervals allow more time to settle into each sensitivity.
+You can confirm shutdown in Task Manager: neither `SensitivityRandomizer.exe`
+nor `SensitivityResetGuard.exe` should remain after normal closure.
 
-There is no universally optimal interval. Choose it according to what you are training.
+## Safety and anti-cheat
 
-### Symmetry / balancing
+The official Raw Accel project describes its signed driver as anti-cheat
+friendly. Sensitivity Randomizer is a separate, unsigned third-party utility.
+It is not affiliated with or approved by Raw Accel, any game publisher, league,
+tournament organiser or anti-cheat vendor.
 
-When enabled, randomization is balanced around the baseline instead of simply treating a numerically asymmetric range as an ordinary uniform interval.
-
-This is useful when you want exposure to both lower and higher sensitivities without unintentionally spending most of the session on only one side of your baseline.
-
-### Base sensitivity / DPI fields
-
-These fields are used for displaying or calculating your effective sensitivity.
-
-The program does **not** physically change the hardware DPI stored in your mouse. The actual change is applied as a raw-input sensitivity multiplier through the Raw Accel driver.
-
-## Using it with games
-
-Sensitivity Randomizer is not tied to any particular game.
-
-For most games:
-
-1. Keep your usual in-game sensitivity.
-2. Start Sensitivity Randomizer before training.
-3. Use the multiplier range to control how far your effective sensitivity can move away from the baseline.
-4. Stop randomization when you want to return to your normal sensitivity.
-
-Because the change happens before the game's own sensitivity scaling, no game-specific sensitivity conversion is required.
-
-## Anti-cheat note
-
-Raw Accel is a signed driver designed with anti-cheat compatibility in mind. Its official documentation states that it has historically worked with anti-cheat systems including FACEIT and VALORANT.
-
-However, Sensitivity Randomizer is a separate third-party project and is **not affiliated with Raw Accel, FACEIT, Valve, Riot Games, or any game developer**.
-
-No third-party project can guarantee that every anti-cheat vendor will keep the same policy forever. If you are playing in a tournament or league with specific software restrictions, check the current rules.
+An unsigned filename alone is not proof of cheating, but nobody outside an
+anti-cheat vendor can guarantee that custom software will never be flagged or
+that policies will remain unchanged. Check the current rules before protected or
+competitive play. Test setup and restoration outside a protected match first.
 
 ## Windows SmartScreen
 
-Unsigned or newly released Windows applications can trigger a Microsoft Defender SmartScreen warning because the executable has little or no reputation yet.
+The RC2 executables are currently **unsigned**. Microsoft Defender SmartScreen
+may therefore show an “unknown publisher” or reputation warning even when local
+antivirus scanning finds no threat. Renaming, repacking or self-signing the EXE
+cannot legitimately remove that warning.
 
-If this project is distributed without a commercial code-signing certificate, this warning can occur even when the file itself has not been detected as malware.
+For this release:
 
-For safety, download Sensitivity Randomizer only from this repository's official **Releases** page.
+1. download only from this repository's Releases page;
+2. compare the files against `SHA256SUMS.txt`;
+3. scan the archive with Microsoft Defender or another service you trust;
+4. proceed only if you understand and accept the warning.
+
+A future release signed with a trusted code-signing certificate can show a
+verified publisher and build reputation, but SmartScreen reputation is still
+controlled by Microsoft. See [SIGNING.md](SIGNING.md) for the release-signing
+workflow.
 
 ## Troubleshooting
 
-### The program says Raw Accel is not installed
+### Nothing happens after launching the EXE
 
-Make sure you:
+- Extract the **entire** release instead of opening the EXE inside the ZIP.
+- Confirm `wrapper.dll` and `Newtonsoft.Json.dll` are beside the EXE.
+- Install the x64 Visual C++ Redistributable and .NET Framework 4.7.2+.
+- Check `%LOCALAPPDATA%\SensitivityRandomizer\startup.log`.
 
-1. Ran the Raw Accel `installer.exe`.
-2. Restarted Windows after installation.
-3. Are using a supported 64-bit version of Windows.
+### Raw Accel is not detected
 
-### Sensitivity is not randomized after reboot
+Run the official Raw Accel installer and restart Windows. Installing only the
+GUI files without the driver is insufficient.
 
-This is expected until a program sends settings to the Raw Accel driver again.
+### Verification reports acceleration
 
-Launch Sensitivity Randomizer and start randomization.
+Open Raw Accel, set every relevant profile to **Off / noaccel**, apply it, then
+run **Verify** again. Sensitivity Randomizer deliberately blocks speed-based
+profiles.
 
-### I deleted the Raw Accel download folder
+### The multiplier is not `1.000`
 
-That is fine if the driver was already installed successfully.
+Press `F9`, click **Stop**, or run `SensitivityResetGuard.exe`. Then use
+**Verify**. If readback still differs, open Raw Accel, apply a constant-gain
+profile at `1.000`, and investigate before playing.
 
-If you later need Raw Accel's GUI or uninstaller, download the current official release again.
+More diagnostics are in [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
 
-### My sensitivity feels wrong after closing the program
+## Updating and uninstalling
 
-Stop randomization from inside the application before closing it. If the application terminated unexpectedly, reopen it and restore the baseline value.
+To update, close the app, extract the new release to a clean folder and copy or
+import your profile. Raw Accel normally does not need to be reinstalled unless
+the release notes say otherwise.
 
-If a release has a reproducible restoration bug, please report it in **Issues** with the exact version and steps that caused it.
-
-## Why randomized sensitivity?
-
-The idea is simple: instead of practicing mouse control only under one fixed sensitivity, the player repeatedly adapts to different control scales.
-
-This can be useful as a form of variable practice, especially in dedicated aim-training or mechanical practice sessions.
-
-Sensitivity Randomizer should not be treated as a scientifically proven shortcut to better aim. It is a training tool. Whether it helps depends on the player, training design, range, interval, and total practice quality.
-
-## Updating
-
-New builds are published through GitHub **Releases**.
-
-When updating:
-
-1. Stop the current randomization session.
-2. Close the application.
-3. Download the new release.
-4. Replace the old application files.
-5. Start the new version.
-
-Raw Accel normally does not need to be reinstalled for every Sensitivity Randomizer update unless the release notes explicitly say otherwise.
-
-## Uninstalling
-
-### Sensitivity Randomizer
-
-The application is portable. Stop randomization, close it, and delete its files.
-
-### Raw Accel
-
-Use the official Raw Accel `uninstaller.exe`, then restart Windows.
-
-If you previously deleted the Raw Accel package, download the official release again to obtain the uninstaller.
+To remove Sensitivity Randomizer, close it and delete its folder. It installs no
+service and creates no autostart entry. To remove Raw Accel itself, run the
+official `uninstaller.exe` and restart Windows.
 
 ## Privacy
 
-Sensitivity Randomizer does not need access to your game account or game files in order to randomize mouse sensitivity.
-
-If telemetry, crash reporting, update checking, or any network functionality is added in a future version, it should be documented here explicitly.
+The current release has no telemetry, account login, game-file access or network
+requirement. Configurations and diagnostic/session logs stay on the local PC.
 
 ## Contributing and bug reports
 
-Bug reports and suggestions are welcome through GitHub **Issues**.
+Issues and pull requests are welcome. A useful bug report includes the app,
+Windows and Raw Accel versions; exact reproduction steps; expected and actual
+behavior; and the relevant error message or startup log.
 
-When reporting a bug, include:
-
-- Sensitivity Randomizer version
-- Windows version
-- Raw Accel version
-- Steps to reproduce the issue
-- Expected behavior
-- Actual behavior
-- Screenshot or error message, if available
+Source builds require Visual Studio 2022 Build Tools with the .NET desktop build
+tools workload. Run `build.ps1 -Configuration Release`; it executes the static
+UI regression checks before compiling the x64 release.
 
 ## Credits
 
-Sensitivity Randomizer uses the **Raw Accel** driver for raw mouse-input sensitivity control.
+Created by [dinati](https://dinati.ru/).
 
-Raw Accel is a separate open-source project and is not developed or maintained by Sensitivity Randomizer.
-
-Created by **dinati**  
-https://dinati.ru
+Sensitivity Randomizer uses the separate open-source
+[Raw Accel](https://github.com/RawAccelOfficial/rawaccel) driver and ships its
+required third-party notices.
 
 ## License
 
-Choose a license before publishing the repository.
-
-If you want people to be able to use, modify, and redistribute the source code with minimal restrictions, the **MIT License** is a common choice.
-
-If you do not want to grant those permissions, do not add an open-source license until you have chosen terms that match what you want.
+Sensitivity Randomizer is released under the [MIT License](LICENSE.txt).
